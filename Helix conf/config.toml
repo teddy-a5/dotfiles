@@ -1,4 +1,4 @@
-theme = "gruvbox_dark" # Change to any theme you prefer, e.g. "onedark", "gruvbox_dark", etc.
+theme = "gruvbox_dark"  # Change to any theme you prefer, e.g. "onedark", "gruvbox_dark", etc.
 
 [editor]
 line-number = "relative"       # "relative" or "absolute"
@@ -8,11 +8,21 @@ auto-save = true
 completion-trigger-len = 1
 idle-timeout = 250             # ms before triggering LSP actions
 scrolloff = 8
+rulers = [80, 100]             # Vertical rulers at columns 80 and 100
+true-color = true              # Enable true color support
+color-modes = true             # Highlight code based on modes
+auto-info = true               # Automatically show LSP info
+auto-pairs = true              # Enable auto-pairing of brackets, quotes, etc.
+bufferline = "multiple"        # Show bufferline for multiple buffers
+middle-click-paste = true      # Enable middle-click paste
+undo-redo = true               # Enable undo/redo
+preview-completion = true      # Preview completion items
 
 [editor.statusline]
-left = ["mode", "spinner", "file-name"]
+left = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
 center = ["diagnostics"]
-right = ["selections", "position", "file-encoding", "file-type"]
+right = ["selections", "position", "position-percentage", "file-encoding", "file-line-ending", "file-type"]
+separator = "│"
 mode.normal = "NORMAL"
 mode.insert = "INSERT"
 mode.select = "SELECT"
@@ -28,20 +38,98 @@ characters.tab = "→"
 characters.space = "·"
 characters.nbsp = "⍽"
 characters.newline = "⏎"
+characters.tabpad = "⇢"
 
 [editor.indent-guides]
 render = true
 character = "│"
+skip-levels = 1                # Skip rendering for the first N levels
+
+[editor.lsp]
+display-messages = true        # Display LSP messages
+display-inlay-hints = true     # Show inlay hints from LSP
+auto-signature-help = true     # Automatically show signature help
+snippets = true                # Enable LSP snippets
+
+[editor.soft-wrap]
+enable = true                  # Enable soft wrapping
+max-wrap = 25                  # Max characters to wrap after
+max-indent-retain = 0          # Retain indentation up to this level
+wrap-indicator = "↪"           # Indicator for wrapped lines
+
+[editor.gutter]
+layout = ["diff", "diagnostics", "line-numbers", "spacer"]
+
+[editor.file-picker]
+hidden = false                 # Show hidden files
+parents = true                 # Show parent directories
+ignore = true                  # Respect .gitignore
+git-ignore = true              # Respect git ignore files
+git-global = true              # Respect global git ignore
+max-depth = 5                  # Max depth for file picker
+
+[editor.search]
+smart-case = true              # Case insensitive unless uppercase is used
+wrap-around = true             # Wrap around searches
 
 [keys.normal]
 "C-s" = ":w"
 "C-q" = ":q"
 "C-S-q" = ":q!"
-"space" = { "f" = ":format", "r" = ":reload", "c" = ":config-reload" }
+"space" = {
+  "f" = ":format",             # Format the file
+  "r" = ":reload",             # Reload the file
+  "c" = ":config-reload",      # Reload config
+  "b" = ":buffer-close",       # Close buffer
+  "n" = ":new",                # New file
+  "o" = ":open",               # Open file
+  "w" = ":w",                  # Write
+  "q" = ":q",                  # Quit
+  "h" = "jump_backward",       # Jump history backward
+  "l" = "jump_forward",        # Jump history forward
+  "s" = ":sh",                 # Open shell
+  "t" = ":theme",              # Change theme
+}
 "ret" = "move_line_down"
 "backspace" = "move_line_up"
 "J" = ["goto_line_end", "insert_mode"]
 "K" = "hover"
+"A-j" = "shrink_selection"     # Shrink selection
+"A-k" = "expand_selection"     # Expand selection
+"A-h" = "select_prev_sibling" # Select previous sibling
+"A-l" = "select_next_sibling" # Select next sibling
+"C-c" = "yank_to_clipboard"    # Yank to system clipboard
+"C-v" = "paste_clipboard_after" # Paste from clipboard after
+"A-/" = "toggle_comments"      # Toggle line comments
+"g" = { "g" = "goto_file_start", "e" = "goto_last_line" }
+"Z" = { "Z" = ":wq", "Q" = ":q!" }
 
 [keys.insert]
 "C-s" = ":w"
+"esc" = ["normal_mode"]
+"C-w" = "delete_word_backward"
+"C-u" = "kill_to_line_start"
+"C-k" = "kill_to_line_end"
+
+[keys.select]
+"space" = {
+  "f" = ":format-selections",  # Format selections
+}
+"J" = ["goto_line_end"]
+"K" = "hover"
+
+# File-type specific settings
+[[language]]
+name = "rust"
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+
+[[language]]
+name = "python"
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+
+[[language]]
+name = "toml"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
