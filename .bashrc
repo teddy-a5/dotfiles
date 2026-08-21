@@ -4,13 +4,14 @@ HISTFILESIZE=20000
 HISTTIMEFORMAT="%F %T "
 HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
+# Share history live across terminals
+PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 
 # Better directory navigation
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
-alias ~='cd ~'
 
 # Enhanced ls commands
 alias ls='ls --color=auto'
@@ -26,8 +27,8 @@ alias df='df -h'
 alias du='du -h'
 alias free='free -h'
 alias ps='ps auxf'
-alias psg='ps aux | grep -v grep | grep -i -e VSZ -e'
-alias top='htop'
+alias psg='ps aux | grep -v grep | grep -i'
+command -v htop >/dev/null 2>&1 && alias top='htop'
 
 # Network commands
 alias ports='netstat -tulanp'
@@ -84,22 +85,13 @@ parse_git_branch() {
 # Green prompt with git branch in yellow
 export PS1='\[\e[0;32m\]\u@\h\[\e[0m\]:\[\e[0;34m\]\w\[\e[0;33m\]$(parse_git_branch)\[\e[0m\]\$ '
 
-# Colored man pages
-export LESS_TERMCAP_mb=$'\e[1;32m'
-export LESS_TERMCAP_md=$'\e[1;32m'
-export LESS_TERMCAP_me=$'\e[0m'
-export LESS_TERMCAP_se=$'\e[0m'
-export LESS_TERMCAP_so=$'\e[01;33m'
-export LESS_TERMCAP_ue=$'\e[0m'
-export LESS_TERMCAP_us=$'\e[1;4;31m'
-
 # Custom functions
 mkcd() { mkdir -p "$1" && cd "$1"; }
 cd() { builtin cd "$@" && ls; }
 
 # Weather lookup
 weather() {
-    curl "wttr.in/$1"
+    curl "wttr.in/${1:-}"
 }
 
 # Inline calculator
@@ -115,9 +107,12 @@ update() {
     sudo apt clean
 }
 
-# Add local bin to PATH
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+# Add local bin to PATH (deduped)
+if [ -d "$HOME/.local/bin" ]; then
+    case ":$PATH:" in
+        *":$HOME/.local/bin:"*) ;;
+        *) PATH="$HOME/.local/bin:$PATH" ;;
+    esac
 fi
 
 # Bash completion
@@ -125,35 +120,31 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
-# Set default editor
+# Set default editor (keep EDITOR and VISUAL consistent)
 export EDITOR='nvim'
-export VISUAL='code'
+export VISUAL='nvim'
 
-# Colored man command override
-man() {
-    env \
-    LESS_TERMCAP_mb=$(printf "\e[1;31m") \
-    LESS_TERMCAP_md=$(printf "\e[1;31m") \
-    LESS_TERMCAP_me=$(printf "\e[0m") \
-    LESS_TERMCAP_se=$(printf "\e[0m") \
-    LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
-    LESS_TERMCAP_ue=$(printf "\e[0m") \
-    LESS_TERMCAP_us=$(printf "\e[1;32m") \
-    man "$@"
-}
+# Colored man pages (single source of truth — used by `man`, `less`, etc.)
+export LESS_TERMCAP_mb=$'\e[1;31m'
+export LESS_TERMCAP_md=$'\e[1;31m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[1;44;33m'
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[1;32m'
 
-
-. "$HOME/.local/bin/env"
+# Load env file only if it exists
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
 # pnpm
-export PNPM_HOME="/home/teddy/.local/share/pnpm"
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
 
+# nvm
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-export PATH="$HOME/.local/bin:$PATH"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
